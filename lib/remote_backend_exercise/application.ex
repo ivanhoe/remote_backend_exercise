@@ -5,6 +5,8 @@ defmodule RemoteBackendExercise.Application do
 
   use Application
 
+  @max_user_workers 8
+
   @impl true
   def start(_type, _args) do
     children = [
@@ -18,7 +20,8 @@ defmodule RemoteBackendExercise.Application do
       RemoteBackendExerciseWeb.Endpoint,
       # Start a worker by calling: RemoteBackendExercise.Worker.start_link(arg)
       # {RemoteBackendExercise.Worker, arg}
-      {RemoteBackendExercise.UserServer, []}
+      {RemoteBackendExercise.UserServer, []},
+      :poolboy.child_spec(:user_worker, user_worker_config())
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -33,5 +36,14 @@ defmodule RemoteBackendExercise.Application do
   def config_change(changed, _new, removed) do
     RemoteBackendExerciseWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  defp user_worker_config do
+    [
+      name: {:local, :user_worker},
+      worker_module: RemoteBackendExercise.UserWorker,
+      size: @max_user_workers,
+      max_overflow: 0
+    ]
   end
 end

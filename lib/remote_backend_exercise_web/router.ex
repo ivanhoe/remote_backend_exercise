@@ -8,4 +8,8 @@ defmodule RemoteBackendExerciseWeb.Router do
   scope "/api", RemoteBackendExerciseWeb do
     pipe_through :api
   end
+
+  scope "/", RemoteBackendExerciseWeb do
+    get "/", UserController, :get_users
+  end
 end

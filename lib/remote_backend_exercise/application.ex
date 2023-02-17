@@ -15,9 +15,10 @@ defmodule RemoteBackendExercise.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: RemoteBackendExercise.PubSub},
       # Start the Endpoint (http/https)
-      RemoteBackendExerciseWeb.Endpoint
+      RemoteBackendExerciseWeb.Endpoint,
       # Start a worker by calling: RemoteBackendExercise.Worker.start_link(arg)
       # {RemoteBackendExercise.Worker, arg}
+      {RemoteBackendExercise.UserServer, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

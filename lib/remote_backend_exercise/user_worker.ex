@@ -11,11 +11,6 @@ defmodule RemoteBackendExercise.UserWorker do
     GenServer.start_link(__MODULE__, nil, [])
   end
 
-  @impl true
-  def init(_) do
-    {:ok, nil}
-  end
-
   def update_user_point(users) do
     Task.start(fn ->
       :poolboy.transaction(
@@ -29,9 +24,13 @@ defmodule RemoteBackendExercise.UserWorker do
   end
 
   @impl true
+  def init(_) do
+    {:ok, nil}
+  end
+
+  @impl true
   def handle_call({:update_user_point, users}, _from, state) do
     Enum.each(users, fn user ->
-      # Logger.debug("Process #{inspect self()} doing work")
       User.update(user, %{points: :rand.uniform(@max_point_value)})
     end)
 

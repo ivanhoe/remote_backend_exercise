@@ -10,7 +10,8 @@ defmodule RemoteBackendExercise.MixProject do
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      dialyzer: [plt_add_apps: [:ex_unit, :mix]]
     ]
   end
 
@@ -41,7 +42,8 @@ defmodule RemoteBackendExercise.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:poolboy, ">= 1.5.1"}
+      {:poolboy, ">= 1.5.1"},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
     ]
   end
 

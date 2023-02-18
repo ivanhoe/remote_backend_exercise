@@ -3,28 +3,36 @@ defmodule RemoteBackendExercise.Context.User do
   The User context.
   """
 
+  use Ecto.Schema
+  import Ecto.Query, warn: false
+
+  alias RemoteBackendExercise.{User, Repo, UserWorker}
   require Logger
 
-  import Ecto.Query, warn: false
-  alias RemoteBackendExercise.{User, Repo}
-  use Ecto.Schema
+  @ten_thousand_users 10_000
 
   @doc """
   Updates a user.
   """
+  @spec update(%User{}, map) :: {:ok, %User{}}
   def update(%User{} = user, attrs) do
     user
     |> User.changeset(attrs)
     |> Repo.update()
   end
 
+  @doc """
+  Update all users.
+  """
+  @spec update_all() :: {:ok, any()}
   def update_all() do
     Repo.transaction(
       fn ->
         from(u in User)
         |> Repo.stream()
-        |> Stream.map(fn user ->
-          __MODULE__.update(user, %{points: :rand.uniform(101)})
+        |> Stream.chunk_every(@ten_thousand_users)
+        |> Stream.each(fn users ->
+          UserWorker.update_user_point(users)
         end)
         |> Stream.run()
       end,
@@ -32,25 +40,23 @@ defmodule RemoteBackendExercise.Context.User do
     )
   end
 
+  @doc """
+  Get two users greater than min_number
+  """
+  @spec get_users(integer()) :: list()
   def get_users(min_number) do
-    Logger.debug("Valor de min_number = #{min_number}")
-
     {:ok, users} =
-      Repo.transaction(
-        fn ->
-          from(u in User,
-            where: u.points > ^min_number,
-            limit: 2
-          )
-          |> Repo.stream()
-          |> Enum.map(fn user ->
-            %{id: user.id, points: user.points}
-          end)
-        end,
-        timeout: :infinity
-      )
+      Repo.transaction(fn ->
+        from(u in User,
+          where: u.points > ^min_number,
+          limit: 2
+        )
+        |> Repo.stream()
+        |> Enum.map(fn user ->
+          %{id: user.id, points: user.points}
+        end)
+      end)
 
-    Logger.debug("Usuarios obtenidos #{inspect(users)}")
     users
   end
 end

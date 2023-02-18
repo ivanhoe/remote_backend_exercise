@@ -1,4 +1,9 @@
 defmodule RemoteBackendExercise.UserWorker do
+  @moduledoc """
+  Updates all the users using a worker available 
+  from the pool.
+  """
+
   use GenServer
 
   require Logger

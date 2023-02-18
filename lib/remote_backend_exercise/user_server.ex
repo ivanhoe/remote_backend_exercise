@@ -1,11 +1,16 @@
 defmodule RemoteBackendExercise.UserServer do
+  @moduledoc """
+  Updates all the users point every 60 seconds and 
+  get two users with the last timestamp obtained. 
+  """
+
   use GenServer
 
   alias RemoteBackendExercise.Context.User
   require Logger
 
   @max_point_value 101
-  @interval :timer.seconds(10)
+  @interval :timer.seconds(60)
 
   @doc """
   Start a new GenServer

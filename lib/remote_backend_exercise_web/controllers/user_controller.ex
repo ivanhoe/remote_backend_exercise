@@ -1,4 +1,7 @@
 defmodule RemoteBackendExerciseWeb.UserController do
+  @moduledoc """
+  Controller to get users response
+  """
   use RemoteBackendExerciseWeb, :controller
 
   alias RemoteBackendExercise.UserServer

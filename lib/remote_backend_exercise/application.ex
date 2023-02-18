@@ -38,6 +38,7 @@ defmodule RemoteBackendExercise.Application do
     :ok
   end
 
+  @spec user_worker_config() :: list()
   defp user_worker_config do
     [
       name: {:local, :user_worker},

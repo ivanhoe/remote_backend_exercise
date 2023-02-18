@@ -2,15 +2,23 @@ defmodule RemoteBackendExercise.UserWorker do
   use GenServer
 
   require Logger
-  alias RemoteExercise.Context.User
+  alias RemoteBackendExercise.Context.User
 
   @time_out 20_000
-  @max_point_value 101
+  @max_point_value 100
 
+  @doc """
+  Start a new GenServer
+  """
+  @spec start_link(any()) :: {:ok, pid}
   def start_link(_) do
     GenServer.start_link(__MODULE__, nil, [])
   end
 
+  @doc """
+  Updates point attribute in all the Users.
+  """
+  @spec update_user_point(list()) :: {:ok, pid}
   def update_user_point(users) do
     Task.start(fn ->
       :poolboy.transaction(

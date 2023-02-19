@@ -10,7 +10,6 @@ defmodule RemoteBackendExercise.UserWorker do
   alias RemoteBackendExercise.Context.User
 
   @time_out 20_000
-  @max_point_value 100
 
   @doc """
   Start a new GenServer
@@ -21,15 +20,16 @@ defmodule RemoteBackendExercise.UserWorker do
   end
 
   @doc """
-  Updates point attribute in all the Users.
+  Create a new process to invoke a worker available 
+  from the pool to update the users point
   """
-  @spec update_user_point(list()) :: {:ok, pid}
-  def update_user_point(users) do
+  @spec update_user_points(list()) :: {:ok, pid}
+  def update_user_points(users) do
     Task.start(fn ->
       :poolboy.transaction(
         :user_worker,
         fn pid ->
-          GenServer.call(pid, {:update_user_point, users}, @time_out)
+          GenServer.call(pid, {:update_user_points, users}, @time_out)
         end,
         :infinity
       )
@@ -42,11 +42,8 @@ defmodule RemoteBackendExercise.UserWorker do
   end
 
   @impl true
-  def handle_call({:update_user_point, users}, _from, state) do
-    Enum.each(users, fn user ->
-      User.update(user, %{points: :rand.uniform(@max_point_value)})
-    end)
-
-    {:reply, "response", state}
+  def handle_call({:update_user_points, users}, _from, state) do
+    User.update_points(users)
+    {:reply, nil, state}
   end
 end

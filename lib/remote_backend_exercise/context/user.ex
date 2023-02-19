@@ -10,34 +10,41 @@ defmodule RemoteBackendExercise.Context.User do
   require Logger
 
   @ten_thousand_users 10_000
+  @max_point_value 100
 
   @doc """
-  Updates a user.
+  Update all users in batch
   """
-  @spec update(%User{}, map) :: {:ok, %User{}}
-  def update(%User{} = user, attrs) do
-    user
-    |> User.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Update all users.
-  """
-  @spec update_all() :: {:ok, any()}
-  def update_all() do
+  @spec update_users_in_batch() :: {:ok, any()}
+  def update_users_in_batch() do
     Repo.transaction(
       fn ->
         from(u in User)
         |> Repo.stream()
         |> Stream.chunk_every(@ten_thousand_users)
         |> Stream.each(fn users ->
-          UserWorker.update_user_point(users)
+          UserWorker.update_user_points(users)
         end)
         |> Stream.run()
       end,
       timeout: :infinity
     )
+  end
+
+  @doc """
+  Update a batch of users in a transaction
+  """
+  @spec update_points(list()) :: {:ok, any()}
+  def update_points(users) do
+    users
+    |> Enum.reduce(Ecto.Multi.new(), fn user, multi ->
+      Ecto.Multi.update(
+        multi,
+        {:user, user.id},
+        User.changeset(user, %{points: :rand.uniform(@max_point_value)})
+      )
+    end)
+    |> Repo.transaction()
   end
 
   @doc """

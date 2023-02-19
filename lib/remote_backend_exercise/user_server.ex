@@ -37,7 +37,7 @@ defmodule RemoteBackendExercise.UserServer do
 
   @impl true
   def handle_info({:update_points}, state) do
-    Task.start(fn -> User.update_all() end)
+    Task.start(fn -> User.update_users_in_batch() end)
     update_user_points_every(@interval)
     {:noreply, Map.put(state, :min_number, get_random_number())}
   end

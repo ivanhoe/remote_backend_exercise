@@ -17,19 +17,32 @@ Follow the next steps to run the project:
 	```
 		asdf install elixir 1.14.2-otp-25
 	```
+4. In the root of the project run 
 
-4. Download dependencies
+	```
+		asdf local erlang 25.1.2
+		asdf local elixir 1.14.2-otp-25
+	```
+
+5. Clone the repo 
+	
+	```
+	git clone https://github.com/ivanhoe/remote_backend_exercise.git
+	```
+
+6. Download dependencies
 
 	```
 	  mix deps.get
 	```
 	
-5. Create the database and migrate
+7. Create the database, execute migrations and run the seed
+	
 	```
 	  mix ecto.setup
 	```
 
-6. Run the server
+8. Run the server
 
 	```
 	mix phx.server

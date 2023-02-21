@@ -7,9 +7,9 @@ defmodule RemoteBackendExercise.UserServer do
   use GenServer
 
   alias RemoteBackendExercise.Context.User
+  alias RemoteBackendExercise.UserHelper
   require Logger
 
-  @max_point_value 101
   @interval :timer.seconds(60)
 
   @doc """
@@ -32,20 +32,20 @@ defmodule RemoteBackendExercise.UserServer do
   @impl true
   def init(_) do
     update_user_points_every(@interval)
-    {:ok, %{min_number: get_random_number(), timestamp: nil}}
+    {:ok, %{min_number: UserHelper.get_random_number(), timestamp: nil}}
   end
 
   @impl true
   def handle_info({:update_points}, state) do
     Task.start(fn -> User.update_users_in_batch() end)
     update_user_points_every(@interval)
-    {:noreply, Map.put(state, :min_number, get_random_number())}
+    {:noreply, Map.put(state, :min_number, UserHelper.get_random_number())}
   end
 
   @impl true
   def handle_call({:get_users}, _from, state) do
     min_number = Map.get(state, :min_number)
-    users = User.get_users(min_number)
+    users = User.get_two_with_points_greater_than(min_number)
 
     {:ok, timestamp} = DateTime.now("Etc/UTC")
     timestamp = DateTime.truncate(timestamp, :second)
@@ -60,16 +60,11 @@ defmodule RemoteBackendExercise.UserServer do
     {:reply, result, state}
   end
 
-  # Helper functions
+  # Helper function
   @spec update_user_points_every(integer()) :: any()
   defp update_user_points_every(interval) do
     __MODULE__
     |> Process.whereis()
     |> Process.send_after({:update_points}, interval)
-  end
-
-  @spec get_random_number() :: integer()
-  defp get_random_number() do
-    :rand.uniform(@max_point_value)
   end
 end

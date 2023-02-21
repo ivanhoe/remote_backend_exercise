@@ -6,11 +6,11 @@ defmodule RemoteBackendExercise.Context.User do
   use Ecto.Schema
   import Ecto.Query, warn: false
 
-  alias RemoteBackendExercise.{User, Repo, UserWorker}
+  alias RemoteBackendExercise.{User, Repo, UserWorker, UserHelper}
   require Logger
 
   @ten_thousand_users 10_000
-  @max_point_value 100
+  @max_users 2
 
   @doc """
   Update all users in batch
@@ -32,7 +32,7 @@ defmodule RemoteBackendExercise.Context.User do
   end
 
   @doc """
-  Update a batch of users in a transaction
+  Update points attribute from a batch of users in a transaction
   """
   @spec update_points(list()) :: {:ok, any()}
   def update_points(users) do
@@ -41,7 +41,7 @@ defmodule RemoteBackendExercise.Context.User do
       Ecto.Multi.update(
         multi,
         {:user, user.id},
-        User.changeset(user, %{points: :rand.uniform(@max_point_value)})
+        User.changeset(user, %{points: UserHelper.get_random_number()})
       )
     end)
     |> Repo.transaction()
@@ -50,13 +50,13 @@ defmodule RemoteBackendExercise.Context.User do
   @doc """
   Get two users greater than min_number
   """
-  @spec get_users(integer()) :: list()
-  def get_users(min_number) do
+  @spec get_two_with_points_greater_than(integer()) :: list()
+  def get_two_with_points_greater_than(min_number) do
     {:ok, users} =
       Repo.transaction(fn ->
         from(u in User,
           where: u.points > ^min_number,
-          limit: 2
+          limit: @max_users
         )
         |> Repo.stream()
         |> Enum.map(fn user ->

@@ -17,14 +17,14 @@ Follow the next steps to run the project:
 	```
 		asdf install elixir 1.14.2-otp-25
 	```
-	
-2. Download dependencies
+
+4. Download dependencies
 
 	```
 	  mix deps.get
 	```
-
-3. Create the database and migrate
+	
+5. Create the database and migrate
 	```
 	  mix ecto.setup
 	```
